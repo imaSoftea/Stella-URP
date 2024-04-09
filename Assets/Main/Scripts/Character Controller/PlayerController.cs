@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using TMPro;
 using System;
+using Unity.Mathematics;
 
 public class PlayerController : MonoBehaviour
 {
@@ -51,8 +52,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-
-        touchingGround = (Physics.Raycast(transform.position, -Vector3.up, 1.1f));
+        touchingGround = (Physics.Raycast(transform.position, -Vector3.up, 1.2f));
         DetermineState();
 
         switch(state)
@@ -84,6 +84,22 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+        if(Input.GetButton("Mouse"))
+        {
+            rb.AddForce(-Vector3.up * 10);
+
+            if (touchingGround)
+            {
+                float speedAdjust = glideAcceleration * -0.05f * rb.velocity.y  * Time.deltaTime;
+                if(rb.velocity.y > 0)
+                {
+                    speedAdjust *= 2;
+                }
+                maxSpeed += speedAdjust;
+                rb.AddForce(new Vector3(rb.velocity.x, 0, rb.velocity.z).normalized * 10);
+            }
+        }
+
         Vector3 flatForward = cameraTransform.forward;
         flatForward.y = 0;
         flatForward.Normalize();
@@ -102,7 +118,6 @@ public class PlayerController : MonoBehaviour
 
     void Glide()
     {
-
         if(jumping) return;
 
         if (Input.GetButtonDown("Jump"))
@@ -252,9 +267,9 @@ public class PlayerController : MonoBehaviour
     {
         while(true)
         {
-            yield return new WaitForSeconds(0.5f);
-            float speedInMilesPerHour = rb.velocity.magnitude * 2.23694f; 
-            speedText.text = speedInMilesPerHour.ToString("0");
+            yield return new WaitForSeconds(0.2f);
+            float speedInMilesPerHour = new Vector3(rb.velocity.x, 0, rb.velocity.z).magnitude * 2.23694f; 
+            speedText.text = speedInMilesPerHour.ToString("0.0");
         }
     }
 
