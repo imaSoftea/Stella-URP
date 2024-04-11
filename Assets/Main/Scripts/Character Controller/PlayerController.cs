@@ -5,6 +5,7 @@ using System;
 using Unity.Mathematics;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
+using Unity.VisualScripting;
 
 public class PlayerController : MonoBehaviour
 {
@@ -45,6 +46,7 @@ public class PlayerController : MonoBehaviour
     public float jumpHeight = 2.0f;
     public Transform cameraTransform;
     private bool jumping = false;
+    public float breakSpeed;
 
     // Gliding
     public float wallDetectionDistance = 1f;
@@ -120,6 +122,15 @@ public class PlayerController : MonoBehaviour
                 StartCoroutine(ResetJump());
                 float jumpForce = Mathf.Sqrt(jumpHeight * -2.0f * gravityValue);
                 rb.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
+            }
+        }
+
+        if(Input.GetButton("Brake") && touchingGround)
+        {
+            maxSpeed -= breakSpeed * 0.5f * Mathf.Sqrt(maxSpeed) * Time.deltaTime;
+            if(maxSpeed < maxSpeedMin)
+            {
+                maxSpeed = maxSpeedMin;
             }
         }
 
