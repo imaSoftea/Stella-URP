@@ -67,7 +67,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 6000
+  far clip plane: 10000
   field of view: 70
   orthographic: 0
   orthographic size: 5
@@ -288,14 +288,15 @@ MonoBehaviour:
   rb: {fileID: 3127481028430889273}
   state: 0
   speedBuffer: 2
+  groundAcceleration: 5
   initialAcceleration: 96
-  maxSpeedMin: 32
+  maxSpeedMin: 26
   gravityValue: -9.81
   jumpHeight: 6
   cameraTransform: {fileID: 4475976476615451439}
   breakSpeed: 5
   wallDetectionDistance: 1
-  glideAcceleration: 5
+  glideAcceleration: 10
   wallLayerMask:
     serializedVersion: 2
     m_Bits: 64

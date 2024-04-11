@@ -39,6 +39,7 @@ public class PlayerController : MonoBehaviour
 
 
     // Default Movement
+    public float groundAcceleration = 5.0f;
     public float initialAcceleration = 5.0f;
     public float maxSpeedMin = 16.0f;
     private float maxSpeed;
@@ -128,9 +129,15 @@ public class PlayerController : MonoBehaviour
         if(Input.GetButton("Brake") && touchingGround)
         {
             maxSpeed -= breakSpeed * 0.5f * Mathf.Sqrt(maxSpeed) * Time.deltaTime;
-            if(maxSpeed < maxSpeedMin)
+            if(maxSpeed <= maxSpeedMin)
             {
                 maxSpeed = maxSpeedMin;
+                rb.AddForce(breakSpeed * 250 * Time.deltaTime * -rb.velocity.normalized);
+                if(rb.velocity.magnitude < 0.1f)
+                {
+                    rb.velocity = new Vector3(0,0,0);
+                }
+                Debug.Log("Breaking");
             }
         }
 
@@ -140,7 +147,7 @@ public class PlayerController : MonoBehaviour
 
             if (touchingGround)
             {
-                float speedAdjust = glideAcceleration * -0.05f * rb.velocity.y  * Time.deltaTime;
+                float speedAdjust = groundAcceleration * -0.05f * rb.velocity.y  * Time.deltaTime;
                 if(rb.velocity.y > 0)
                 {
                     speedAdjust *= 2;
@@ -163,7 +170,7 @@ public class PlayerController : MonoBehaviour
 
         move = flatForward * move.z;
 
-        rb.AddForce(move * initialAcceleration * 10 * Time.deltaTime);
+        rb.AddForce(10 * initialAcceleration * Time.deltaTime * move);
     }
 
     void Glide()
