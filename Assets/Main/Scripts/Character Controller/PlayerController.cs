@@ -11,9 +11,9 @@ public class PlayerController : MonoBehaviour
 {
     public enum MovementState
     {
-        Default,
-        Gliding,
-        Rewinding
+        Default = 1,
+        Gliding = 2,
+        Rewinding = 3
     } 
 
     public struct RewindDataPoint
@@ -36,6 +36,7 @@ public class PlayerController : MonoBehaviour
     private bool touchingGround = true;
     public float speedBuffer = 2.0f;
     private Vector3 previousPosition;
+    public Animator animator;
 
 
     // Default Movement
@@ -48,6 +49,7 @@ public class PlayerController : MonoBehaviour
     public Transform cameraTransform;
     private bool jumping = false;
     public float breakSpeed;
+    private float lastGroundedTime = 0.0f;
 
     // Gliding
     public float wallDetectionDistance = 1f;
@@ -83,6 +85,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         touchingGround = (Physics.Raycast(transform.position, -Vector3.up, 1.2f));
+        if(!touchingGround) lastGroundedTime += Time.deltaTime; else lastGroundedTime = 0;
         DetermineState();
 
         if(rewindRelease && state != MovementState.Rewinding)
@@ -106,6 +109,8 @@ public class PlayerController : MonoBehaviour
                 Rewind();
                 break;    
         }
+
+        ManageState();
 
         MaxSpeedCheck();
     }
@@ -133,7 +138,7 @@ public class PlayerController : MonoBehaviour
             {
                 maxSpeed = maxSpeedMin;
                 rb.AddForce(breakSpeed * 250 * Time.deltaTime * -rb.velocity.normalized);
-                if(rb.velocity.magnitude < 0.1f)
+                if(rb.velocity.magnitude < 0.3f)
                 {
                     rb.velocity = new Vector3(0,0,0);
                 }
@@ -436,7 +441,68 @@ public class PlayerController : MonoBehaviour
 
     IEnumerator ResetJump()
     {
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.4f);
         jumping = false;
+    }
+
+    private void ManageState()
+    {
+        switch(state)
+        {
+            // Idle = 0
+                // Walking = 1
+                // Falling = 2
+                // Gliding = 3
+
+            case MovementState.Rewinding:
+                // *REPLACE WITH REWINDING REVERSE BOOL
+
+            case MovementState.Default:
+                if(touchingGround || lastGroundedTime < 0.4f && !jumping)
+                {
+                    if(rb.velocity.magnitude < 0.2f && Input.GetButton("Brake"))
+                    {
+                        animator.SetInteger("state", 0);
+                    }
+                    else
+                    {
+                        animator.SetInteger("state", 1);
+                    }
+                }
+                else
+                {
+                    animator.SetInteger("state", 2);
+                }
+                break;
+
+            case MovementState.Gliding:
+                animator.SetInteger("state", 3);
+                break;
+        }
+
+        if (rb.velocity.magnitude > 0.2f  && !Input.GetButton("Brake"))
+        {
+            if(touchingGround || lastGroundedTime < 0.4f && !jumping)
+            {
+                if (Physics.Raycast(transform.position, -1 * Vector3.up, out RaycastHit hit))
+                {
+                    float dotProduct = Vector3.Dot(rb.velocity.normalized, hit.normal);
+                    if(Mathf.Abs(dotProduct) < 0.4f)
+                    {
+                        transform.rotation = Quaternion.LookRotation(rb.velocity.normalized);
+                        return;
+                    }
+                }
+                else
+                {
+                    transform.rotation = Quaternion.LookRotation(new Vector3(rb.velocity.normalized.x, 0, rb.velocity.normalized.z));
+                }
+                
+            }
+            else
+            {
+                transform.rotation = Quaternion.LookRotation(new Vector3(rb.velocity.normalized.x, 0, rb.velocity.normalized.z));
+            }
+        }
     }
 }

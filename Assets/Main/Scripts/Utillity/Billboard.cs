@@ -24,8 +24,7 @@ public class Billboard : MonoBehaviour
     void Update()
     {
         // Rotate the billboard to face towards the camera
-        transform.LookAt(transform.position + mainCamera.transform.rotation * Vector3.forward,
-            mainCamera.transform.rotation * Vector3.up);
+        transform.LookAt(mainCamera.transform);
 
         // Hover effect
         Hover();
