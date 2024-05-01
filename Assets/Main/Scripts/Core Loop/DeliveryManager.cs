@@ -11,6 +11,7 @@ public class DeliveryManager : MonoBehaviour
     public float maxTimeLeft = 240;
     private float currentTimeLeft = 0;
     private bool gameInProgress = false;
+    public GameObject deliveryText;
 
     // Mail Collected
     private int countLeft = 0;
@@ -30,7 +31,7 @@ public class DeliveryManager : MonoBehaviour
         }
         if(currentTimeLeft < 0)
         {
-            GameLost();
+            //GameLost();
         }
     }
 
@@ -63,6 +64,7 @@ public class DeliveryManager : MonoBehaviour
     private void GameWon()
     {
         gameInProgress = false;
+        deliveryText.SetActive(true);
     }
 
     private void GameLost()

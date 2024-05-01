@@ -285,15 +285,16 @@ MonoBehaviour:
   state: 0
   speedBuffer: 2
   animator: {fileID: 2798101633573175003}
-  groundAcceleration: 5
-  initialAcceleration: 96
-  maxSpeedMin: 26
-  gravityValue: -11
+  playerCamera: {fileID: 2298271228749966463}
+  groundAcceleration: 12
+  initialAcceleration: 128
+  maxSpeedMin: 64
+  gravityValue: -16
   jumpHeight: 6
   cameraTransform: {fileID: 4475976476615451439}
   breakSpeed: 5
   wallDetectionDistance: 1
-  glideAcceleration: 10
+  glideAcceleration: 30
   wallLayerMask:
     serializedVersion: 2
     m_Bits: 64

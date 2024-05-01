@@ -9,6 +9,7 @@ public class MailPoint : MonoBehaviour
     void Start()
     {
         SingletonHolder.AddMailPoint(id, this);
+        SingletonHolder.GetManager().AddMail();
     }
 
     void OnTriggerEnter()

@@ -6,6 +6,7 @@ using Unity.Mathematics;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
 using Unity.VisualScripting;
+using System.Security.Cryptography;
 
 public class PlayerController : MonoBehaviour
 {
@@ -37,6 +38,8 @@ public class PlayerController : MonoBehaviour
     public float speedBuffer = 2.0f;
     private Vector3 previousPosition;
     public Animator animator;
+    public Camera playerCamera;
+    private float currentFOV;
 
 
     // Default Movement
@@ -113,6 +116,30 @@ public class PlayerController : MonoBehaviour
         ManageState();
 
         MaxSpeedCheck();
+
+        if(state != MovementState.Rewinding)
+            CameraUpdate();
+    }
+
+    private void CameraUpdate()
+    {
+        float ourSpeed = rb.velocity.magnitude;
+        float baseFOV = 60f; // Base FOV when speed is 0
+        float maxFOV = 100f; // Maximum FOV at maxSpeed
+        float t = ourSpeed / (800 / 2.2369f); // Normalized speed factor (assuming maxSpeed is the speed that gives full FOV increase)
+        
+        // Ensure t stays within 0 and 1
+        t = Mathf.Clamp(t, 0f, 1f);
+
+        // Calculate target FOV based on the normalized speed
+        float targetFOV = Mathf.Lerp(baseFOV, maxFOV, t);
+
+        // Use a smoothing factor to gradually adjust the current FOV towards the target FOV
+        float smoothingFactor = 0.1f; // Adjust this value to control the responsiveness of the FOV changes
+        currentFOV = Mathf.Lerp(currentFOV, targetFOV, smoothingFactor);
+
+        // Apply the smoothed FOV to the camera
+        playerCamera.fieldOfView = currentFOV;
     }
 
     void DefaultMovement()
@@ -126,7 +153,7 @@ public class PlayerController : MonoBehaviour
             {
                 jumping = true;
                 StartCoroutine(ResetJump());
-                float jumpForce = Mathf.Sqrt(jumpHeight * -2.0f * gravityValue);
+                float jumpForce = Mathf.Sqrt(jumpHeight * -5.0f * gravityValue);
                 rb.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
             }
         }
@@ -148,7 +175,7 @@ public class PlayerController : MonoBehaviour
 
         if(Input.GetButton("Mouse"))
         {
-            rb.AddForce(-Vector3.up * 10);
+            rb.AddForce(-Vector3.up * 30);
 
             if (touchingGround)
             {
@@ -166,9 +193,9 @@ public class PlayerController : MonoBehaviour
         flatForward.y = 0;
         flatForward.Normalize();
 
-        if(CheckAngle(flatForward, new Vector3(rb.velocity.x, 0, rb.velocity.z).normalized, 70))
+        if(CheckAngle(flatForward, new Vector3(rb.velocity.x, 0, rb.velocity.z).normalized, 80))
         {
-            float rotationAmount = Input.GetAxis("Horizontal") * 160 * Time.deltaTime;
+            float rotationAmount = Input.GetAxis("Horizontal") * 240 * Time.deltaTime;
             Quaternion rotation = Quaternion.Euler(0, rotationAmount, 0);
             rb.velocity = rotation * rb.velocity;
         }
@@ -359,7 +386,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // Calculate interpolation fraction based on target duration of 0.1 seconds
-        interpolationTime += Time.deltaTime / 0.05f;
+        interpolationTime += Time.deltaTime / 0.025f;
 
         int attempts = 100;
 
